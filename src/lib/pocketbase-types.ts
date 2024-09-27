@@ -35,7 +35,7 @@ export type GamesRecord = {
   description: HTMLString;
   platforms: GamesPlatformsOptions[];
   tool: RecordService<ToolsRecord>;
-  cover: RecordService<ImagesRecord>;
+  cover: string;
   link: string;
   released: IsoDateString;
 };
