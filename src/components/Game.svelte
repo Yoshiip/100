@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { afterNavigate } from "$app/navigation";
   import { pb } from "$lib/pocketbase";
   import type { GamesRecord } from "$lib/pocketbase-types";
   import { gameReleased, getFutureMonthYear } from "$lib/utils";
-  import { blur, fade, fly, scale } from "svelte/transition";
+  import { CircleHelp } from "lucide-svelte";
 
   export let number = 0;
   export let game: GamesRecord | undefined;
@@ -11,6 +10,7 @@
 
   let rotationX = 0;
   let rotationY = 0;
+  let isHovered = false;
 
   function handleMouseMove(event: MouseEvent) {
     const button = event.currentTarget as HTMLButtonElement;
@@ -18,9 +18,8 @@
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Calcul des rotations
-    rotationX = (y / rect.height - 0.5) * -20; // rotation X (haut/bas)
-    rotationY = (x / rect.width - 0.5) * 20; // rotation Y (gauche/droite)
+    rotationX = (y / rect.height - 0.5) * -25;
+    rotationY = (x / rect.width - 0.5) * 25;
   }
 
   function resetTransform() {
@@ -28,65 +27,63 @@
     rotationY = 0;
   }
 
-  let visible = false;
-  afterNavigate(() => {
+  function handleMouseEnter() {
+    isHovered = true;
+  }
+
+  function handleMouseLeave() {
+    isHovered = false;
     resetTransform();
-    visible = true;
-  });
+  }
 </script>
 
-{#if visible}
-  <button
-    on:mousemove={handleMouseMove}
-    on:mouseleave={resetTransform}
-    style="transform: perspective(600px) rotateX({rotationX}deg) rotateY({rotationY}deg);"
-    class="group w-full aspect-video max-w-xs relative border-gray-200 border rounded shadow-lg transition-all duration-200 ease-out hover:border-gray-300 hover:shadow-2xl"
-    on:click={() => {
-      cardClicked(number);
-    }}
-    in:scale={{ duration: 200, delay: (number - 1) * 25 }}
-  >
-    {#if gameReleased(game) && game !== undefined}
-      {#if game.cover}
-        <img
-          src={pb.files.getUrl(game, game.cover)}
-          aria-hidden="true"
-          class="absolute left-0 top-0 right-0 bottom-0 object-cover pointer-events-none -z-10"
-          alt="Game Cover"
-        />
-        <div
-          class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out"
-        >
-          <h5 class="font-semibold text-left ml-4">{game.name}</h5>
-        </div>
-      {:else}
-        <div
-          class="absolute left-0 top-0 right-0 h-8 bg-gradient-to-b from-gray-500 text-white"
-        >
-          <span
-            class="font-bold italic opacity-25 -z-10 text-2xl absolute right-4 top-2 select-none"
-            aria-hidden="true">{number + 1}</span
-          >
-          <span
-            class="font-bold italic opacity-25 -z-10 text-md uppercase absolute left-4 top-2 select-none"
-            aria-hidden="true">{getFutureMonthYear(number)}</span
-          >
-        </div>
-        <h5 class="font-semibold ml-4">{game.name}</h5>
-      {/if}
-    {:else}
-      <h2 class="text-xl text-slate-600">Upcoming...</h2>
-    {/if}
+<button
+  on:mousemove={handleMouseMove}
+  on:mouseenter={handleMouseEnter}
+  on:mouseleave={handleMouseLeave}
+  class="group w-full aspect-video bg-white max-w-xs relative border-gray-200 border rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:border-gray-300"
+  on:click={() => {
+    cardClicked(number);
+  }}
+  style="transform: perspective(600px) rotateX({rotationX}deg) rotateY({rotationY}deg);"
+>
+  {#if game && gameReleased(game)}
+    <img
+      src={pb.files.getUrl(game, game.cover)}
+      class="absolute left-0 top-0 right-0 bottom-0 object-cover pointer-events-none -z-10 rounded-lg"
+      alt="Game Cover"
+    />
+    <div
+      class="absolute bottom-0 left-0 right-0 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out rounded-b-lg"
+    >
+      <h5 class="font-semibold text-left ml-4">{game.name}</h5>
+    </div>
     <div class="absolute left-0 top-0 right-0 h-8 text-white">
-      <div class="bg-gradient-to-b from-black w-full h-full opacity-50" />
+      <div class="bg-gradient-to-b from-black opacity-50 h-10 rounded-t-lg" />
+      <span class="font-bold italic text-2xl absolute right-4 top-2 select-none"
+        >{number + 1}</span
+      >
+      <span
+        class="font-bold italic text-md uppercase absolute left-4 top-2 select-none"
+        >{getFutureMonthYear(number)}</span
+      >
+    </div>
+  {:else}
+    <div
+      class="text-slate-600 flex items-center justify-center flex-col rounded-lg"
+    >
+      <CircleHelp />
+      <h2 class="text-lg">Upcoming...</h2>
+    </div>
+    <div class="absolute left-0 top-0 right-0 h-8 text-slate-500">
       <span
         class="font-bold italic text-2xl absolute right-4 top-2 select-none"
         aria-hidden="true">{number + 1}</span
       >
       <span
-        class="font-bold italic text-white text-md uppercase absolute left-4 top-2 select-none"
+        class="font-bold italic text-md uppercase absolute left-4 top-2 select-none"
         aria-hidden="true">{getFutureMonthYear(number)}</span
       >
     </div>
-  </button>
-{/if}
+  {/if}
+</button>

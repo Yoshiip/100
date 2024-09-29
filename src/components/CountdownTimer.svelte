@@ -27,7 +27,7 @@
   }
 
   onMount(() => {
-    calculateTimeRemaining(); // Initialise les valeurs au chargement
+    calculateTimeRemaining();
 
     interval = setInterval(() => {
       calculateTimeRemaining();
@@ -41,27 +41,19 @@
   class="flex space-x-4 text-2xl bg-slate-100 border border-slate-400 rounded-full w-min px-6"
 >
   <div class="flex flex-col items-center">
-    <span class="font-bold" transition:fly={{ y: 10, duration: 500 }}
-      >{days}</span
-    >
+    <span class="font-bold">{days}</span>
     <span class="text-sm">days</span>
   </div>
   <div class="flex flex-col items-center">
-    <span class="font-bold" transition:fly={{ y: 10, duration: 500 }}
-      >{hours}</span
-    >
+    <span class="font-bold">{hours}</span>
     <span class="text-sm">hours</span>
   </div>
   <div class="flex flex-col items-center">
-    <span class="font-bold" transition:fly={{ y: 10, duration: 500 }}
-      >{minutes}</span
-    >
+    <span class="font-bold">{minutes}</span>
     <span class="text-sm">minutes</span>
   </div>
   <div class="flex flex-col items-center">
-    <span class="font-bold" transition:fly={{ y: 10, duration: 500 }}
-      >{seconds}</span
-    >
+    <span class="font-bold">{seconds}</span>
     <span class="text-sm">seconds</span>
   </div>
 </div>

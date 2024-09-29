@@ -7,16 +7,25 @@
   import GameDetailsDrawer from "../components/GameDetailsDrawer.svelte";
   import AboutModal from "../components/AboutModal.svelte";
   import ModalFrame from "../components/ModalFrame.svelte";
+  import Logo from "../components/Logo.svelte";
+  import { ArrowUp } from "lucide-svelte";
   import { fly } from "svelte/transition";
 
   let isDrawerOpen = false;
+  let isPlayingModalOpen = false;
+  let aboutModalOpen = false;
+  let showBackToTop = false;
+
+  function handleScroll() {
+    showBackToTop = window.scrollY > 100;
+  }
 
   let games: GamesRecord[] = [];
   let nextReleasedGame: GamesRecord;
   let selectedGame: GamesRecord | undefined;
   let selectedGameNumber: number;
 
-  function fetchGames() {
+  async function fetchGames() {
     pb.collection("games")
       .getFullList({
         sort: "number",
@@ -27,7 +36,11 @@
         let now = new Date();
         games.forEach((game) => {
           let gameReleaseDate = new Date(game.released);
-          if (gameReleaseDate > now) {
+          if (
+            gameReleaseDate > now &&
+            (!nextReleasedGame ||
+              gameReleaseDate < new Date(nextReleasedGame.released))
+          ) {
             nextReleasedGame = game;
           }
         });
@@ -47,10 +60,15 @@
     isDrawerOpen = true;
   }
 
-  let isPlayingModalOpen = false;
-
   function playGame() {
     isPlayingModalOpen = true;
+  }
+
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // Animation fluide pour remonter
+    });
   }
 </script>
 
@@ -58,26 +76,34 @@
   <title>Aymeri's 100</title>
 </svelte:head>
 
-<button
-  class="bg-slate-200 border border-slate-400 p-2 rounded hover:bg-slate-100"
-  >About</button
->
+<svelte:window on:scroll={handleScroll} />
 
 <div
   class="fixed top-0 z-[-2] h-screen w-screen rotate-180 transform bg-white bg-[radial-gradient(60%_120%_at_50%_50%,hsla(210,100%,100%,0)_0,rgba(173,216,230,0.5)_100%)] animate-pulse-gradient"
 ></div>
 
+<nav class="flex justify-center w-full my-4">
+  <button
+    class="bg-white rounded-full p-2 hover:bg-slate-100 active:scale-95 border hover:border-slate-300 transition-all shadow-md"
+    on:click={() => (aboutModalOpen = true)}>About</button
+  >
+</nav>
 <main class="m-auto max-w-5xl">
-  <div class="flex flex-col items-center justify-center mt-16 mb-12">
-    <div class="flex flex-col items-center">
-      <h2 class="bg-black text-white font-bold text-5xl px-4 italic">
+  <div class="flex flex-col gap-8 items-center justify-center mt-8 mb-8">
+    <div class="flex flex-col items-center gap-4">
+      <h2 class="bg-black text-white rounded font-bold text-5xl px-4 italic">
         AYMERI'S
       </h2>
-      <h1 class="text-9xl font-black italic mb-8">100</h1>
+      <Logo />
     </div>
-    <h4 class="text-lg">Next game in...</h4>
-    <CountdownTimer targetDate={nextReleasedGame?.released} />
+    {#if nextReleasedGame}
+      <div class="flex flex-col items-center">
+        <h3 class="text-lg font-bold">Next game in...</h3>
+        <CountdownTimer targetDate={nextReleasedGame?.released} />
+      </div>
+    {/if}
   </div>
+
   <div
     class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
   >
@@ -89,11 +115,25 @@
   </div>
 </main>
 
-{#if isPlayingModalOpen && selectedGame}
-  <ModalFrame bind:game={selectedGame} />
+<footer class="h-24"></footer>
+
+{#if showBackToTop}
+  <div
+    class="fixed bottom-4 right-4 bg-slate-200 border border-slate-400 p-2 rounded-full hover:bg-slate-100 cursor-pointer"
+    on:click={scrollToTop}
+    transition:fly={{ x: 100, duration: 100 }}
+  >
+    <ArrowUp size="1.5rem" />
+  </div>
+{/if}
+{#if selectedGame}
+  <ModalFrame bind:isOpen={isPlayingModalOpen} bind:game={selectedGame} />
 {/if}
 
-<AboutModal closeModal={() => {}} isOpen={false} />
+<AboutModal
+  closeModal={() => (aboutModalOpen = false)}
+  bind:isOpen={aboutModalOpen}
+/>
 
 <GameDetailsDrawer
   bind:isDrawerOpen
@@ -103,7 +143,6 @@
 />
 
 <style>
-  /* Animation Pulse */
   @keyframes pulse-gradient {
     0% {
       opacity: 1;
@@ -116,7 +155,6 @@
     }
   }
 
-  /* Classe pour ajouter l'animation */
   .animate-pulse-gradient {
     animation: pulse-gradient 4s infinite ease-in-out;
   }
