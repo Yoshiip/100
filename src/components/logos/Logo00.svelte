@@ -3,7 +3,7 @@
 
   const HEIGHT = 100;
   const EYE_ASPECT_RATIO = 0.85;
-  const WIDTH = 188;
+  const WIDTH = 184;
   let canvas: HTMLCanvasElement;
   let mouseX = 0;
   let mouseY = 0;
@@ -70,7 +70,7 @@
 
 <svelte:window on:mousemove={updateMousePosition} />
 
-<div class="flex gap-6">
+<div class="flex gap-4">
   <img src="one.svg" width={HEIGHT / 2} height={HEIGHT} alt="Digit 1" />
   <canvas bind:this={canvas} width={WIDTH} height={HEIGHT}></canvas>
 </div>

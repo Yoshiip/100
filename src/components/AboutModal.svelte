@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SupportButton from "./buttons/SupportButton.svelte";
   import Modal from "./Modal.svelte";
   import ModalCloseButton from "./modals/ModalCloseButton.svelte";
 
@@ -14,7 +15,7 @@
     {
       title: "Can I help you?",
       answer:
-        "Yes, You can help by providing feedback of the games, and sharing around you. If you have skills in game development, you can also contribute by creating assets, music, sound effects, etc. Feel free to get in touch with me via the email below. (You will of course be credited for your work)",
+        "Yes! You can help by providing feedback of the games, and sharing around you. If you have skills in game development, you can also contribute by creating assets, music, sound effects, etc. Feel free to get in touch with me via the email below. (You will of course be credited for your work)",
     },
     {
       title: "What engines are you using?",
@@ -35,6 +36,7 @@
     All these games will be free and available on desktop (primarily web, but
     also Windows/MacOS/Linux if web isn't possible).
   </p>
+  <SupportButton />
   <h4 class="text-xl font-bold text-slate-600 mt-6 mb-3">FAQ</h4>
   <div class="flex flex-col gap-2">
     {#each questions as { title, answer }}

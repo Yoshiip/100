@@ -7,9 +7,10 @@
   import GameDetailsDrawer from "../components/GameDetailsDrawer.svelte";
   import AboutModal from "../components/AboutModal.svelte";
   import ModalFrame from "../components/ModalFrame.svelte";
-  import Logo from "../components/Logo.svelte";
   import { ArrowUp } from "lucide-svelte";
   import { fly } from "svelte/transition";
+  import LogoPicker from "../components/LogoPicker.svelte";
+  import Logo00 from "../components/logos/Logo00.svelte";
 
   let isDrawerOpen = false;
   let isPlayingModalOpen = false;
@@ -67,13 +68,32 @@
   function scrollToTop() {
     window.scrollTo({
       top: 0,
-      behavior: "smooth", // Animation fluide pour remonter
+      behavior: "smooth",
     });
   }
 </script>
 
 <svelte:head>
   <title>Aymeri's 100</title>
+
+  <meta property="og:title" content="Aymeri's 100" />
+  <meta
+    property="og:description"
+    content="Free new games every month, ending in December 2032."
+  />
+  <meta property="og:image" content="logo.png" />
+  <meta property="og:url" content="https://100.aymeri.dev" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@aymeridev" />
+  <meta name="twitter:title" content="Aymeri's 100" />
+  <meta
+    name="twitter:description"
+    content="Free new games every month, ending in December 2032."
+  />
+  <meta name="twitter:image" content="logo.png" />
 </svelte:head>
 
 <svelte:window on:scroll={handleScroll} />
@@ -94,7 +114,7 @@
       <h2 class="bg-black text-white rounded font-bold text-5xl px-4 italic">
         AYMERI'S
       </h2>
-      <Logo />
+      <Logo00 />
     </div>
     {#if nextReleasedGame}
       <div class="flex flex-col items-center">
@@ -114,8 +134,6 @@
     {/if}
   </div>
 </main>
-
-<footer class="h-24"></footer>
 
 {#if showBackToTop}
   <div
