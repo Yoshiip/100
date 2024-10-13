@@ -9,7 +9,6 @@
   };
 
   const handleKeyDown = (event: any) => {
-    console.log(event.key);
     if (event.key === "Escape") {
       handleClose();
     }

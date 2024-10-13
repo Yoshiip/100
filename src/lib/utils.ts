@@ -1,7 +1,7 @@
 import type { GamesRecord } from "./pocketbase-types";
 
 export function getFutureMonthYear(monthsToAdd: number): string {
-  const startMonth = 8;
+  const startMonth = 8-1;
   const startYear = 2024;
 
   const newMonth = (startMonth + monthsToAdd) % 12;
@@ -27,5 +27,9 @@ export function getFutureMonthYear(monthsToAdd: number): string {
 }
 
 export function gameReleased(game: GamesRecord | undefined): game is GamesRecord {
-  return game !== undefined && new Date(game.released) < new Date();
+  return game !== undefined && game.released !== undefined && new Date(game.released) < new Date();
+}
+
+export function gameNotReleased(game: GamesRecord | undefined): game is GamesRecord {
+  return game !== undefined && game.released !== undefined && new Date(game.released) > new Date();
 }

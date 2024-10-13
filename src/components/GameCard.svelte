@@ -1,11 +1,11 @@
 <script lang="ts">
   import { pb } from "$lib/pocketbase";
-  import type { GamesRecord } from "$lib/pocketbase-types";
+  import type { GamesResponse } from "$lib/pocketbase-types";
   import { gameReleased, getFutureMonthYear } from "$lib/utils";
   import { CircleHelp } from "lucide-svelte";
 
   export let number = 0;
-  export let game: GamesRecord | undefined;
+  export let game: GamesResponse | undefined;
   export let cardClicked = (game: number) => {};
 
   let rotationX = 0;
@@ -41,12 +41,27 @@
   on:mousemove={handleMouseMove}
   on:mouseenter={handleMouseEnter}
   on:mouseleave={handleMouseLeave}
-  class="group w-full aspect-video bg-white max-w-xs relative border-gray-200 border rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:border-gray-300"
+  class="group w-full aspect-video bg-white sm:max-w-xs relative border-gray-200 border rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:border-gray-300"
   on:click={() => {
     cardClicked(number);
   }}
   style="transform: perspective(600px) rotateX({rotationX}deg) rotateY({rotationY}deg);"
 >
+  <div
+    class="absolute left-0 top-0 right-0 h-8 text-slate-500 font-bold italic"
+    class:text-white={gameReleased(game)}
+  >
+    {#if gameReleased(game)}
+      <div class="bg-gradient-to-b from-black opacity-50 h-10 rounded-t-lg" />
+    {/if}
+    <span class="text-2xl absolute right-4 top-2 select-none font-mono"
+      >{number}</span
+    >
+    <span
+      class="text-md uppercase absolute left-4 top-2 select-none"
+      aria-hidden="true">{getFutureMonthYear(number)}</span
+    >
+  </div>
   {#if game && gameReleased(game)}
     <img
       src={pb.files.getUrl(game, game.cover)}
@@ -58,32 +73,12 @@
     >
       <h5 class="font-semibold text-left ml-4">{game.name}</h5>
     </div>
-    <div class="absolute left-0 top-0 right-0 h-8 text-white">
-      <div class="bg-gradient-to-b from-black opacity-50 h-10 rounded-t-lg" />
-      <span class="font-bold italic text-2xl absolute right-4 top-2 select-none"
-        >{number + 1}</span
-      >
-      <span
-        class="font-bold italic text-md uppercase absolute left-4 top-2 select-none"
-        >{getFutureMonthYear(number)}</span
-      >
-    </div>
   {:else}
     <div
       class="text-slate-600 flex items-center justify-center flex-col rounded-lg"
     >
       <CircleHelp />
       <h2 class="text-lg">Upcoming...</h2>
-    </div>
-    <div class="absolute left-0 top-0 right-0 h-8 text-slate-500">
-      <span
-        class="font-bold italic text-2xl absolute right-4 top-2 select-none"
-        aria-hidden="true">{number + 1}</span
-      >
-      <span
-        class="font-bold italic text-md uppercase absolute left-4 top-2 select-none"
-        aria-hidden="true">{getFutureMonthYear(number)}</span
-      >
     </div>
   {/if}
 </button>

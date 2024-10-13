@@ -7,7 +7,9 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"typegen": "npx pocketbase-typegen --env",
+		"typegen-json": "npx pocketbase-typegen --json ./pb_schema.json -o src/lib/pocketbase-types.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -26,6 +28,6 @@
 		"@tailwindcss/typography": "^0.5.15",
 		"lucide-svelte": "^0.446.0",
 		"pocketbase": "^0.21.5",
-		"pocketbase-typegen": "^1.0.7"
+		"pocketbase-typegen": "^1.2.1"
 	}
 }

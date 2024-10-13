@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { BellPlus } from "lucide-svelte";
   import { onMount } from "svelte";
-  import { fly } from "svelte/transition";
+  import CircleButton from "./buttons/CircleButton.svelte";
 
   export let targetDate = "";
   let days = 0,
@@ -38,7 +39,7 @@
 </script>
 
 <div
-  class="flex space-x-4 text-2xl bg-slate-100 border border-slate-400 rounded-full w-min px-6"
+  class="flex space-x-4 text-2xl bg-slate-100 border border-slate-400 rounded-full w-min px-6 items-center justify-center"
 >
   <div class="flex flex-col items-center">
     <span class="font-bold">{days}</span>

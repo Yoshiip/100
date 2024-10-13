@@ -23,11 +23,6 @@
     }
 
     draw();
-
-    // Cleanup function to cancel animation and remove listeners
-    onDestroy(() => {
-      cancelAnimationFrame(animationFrameId);
-    });
   });
 
   function drawEye(x: number, y: number): void {

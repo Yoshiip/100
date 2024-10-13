@@ -1,19 +1,21 @@
 <script lang="ts">
-  import { pb } from "$lib/pocketbase";
-  import { onMount } from "svelte";
-  import Game from "../components/Game.svelte";
-  import type { GamesRecord } from "$lib/pocketbase-types";
+  import { GAMES_COLLECTION_ID, pb } from "$lib/pocketbase";
+  import GameCard from "../components/GameCard.svelte";
+  import type { GamesResponse } from "$lib/pocketbase-types";
   import CountdownTimer from "../components/CountdownTimer.svelte";
   import GameDetailsDrawer from "../components/GameDetailsDrawer.svelte";
   import AboutModal from "../components/AboutModal.svelte";
   import ModalFrame from "../components/ModalFrame.svelte";
-  import { ArrowUp } from "lucide-svelte";
-  import { fly } from "svelte/transition";
-  import LogoPicker from "../components/LogoPicker.svelte";
+  import { Gamepad, Youtube, ArrowUp } from "lucide-svelte";
+  import { blur } from "svelte/transition";
   import Logo00 from "../components/logos/Logo00.svelte";
+  import PillButton from "../components/buttons/PillButton.svelte";
+  import Spinner from "../components/Spinner.svelte";
+  import BaseAlert from "../components/alerts/BaseAlert.svelte";
+  import CircleButton from "../components/buttons/CircleButton.svelte";
+  import PillLink from "../components/buttons/PillLink.svelte";
 
   let isDrawerOpen = false;
-  let isPlayingModalOpen = false;
   let aboutModalOpen = false;
   let showBackToTop = false;
 
@@ -21,48 +23,42 @@
     showBackToTop = window.scrollY > 100;
   }
 
-  let games: GamesRecord[] = [];
-  let nextReleasedGame: GamesRecord;
-  let selectedGame: GamesRecord | undefined;
+  let modalFrame: ModalFrame;
+
+  let games: GamesResponse[] = [];
+  let nextReleasedGame: GamesResponse;
   let selectedGameNumber: number;
 
-  async function fetchGames() {
-    pb.collection("games")
-      .getFullList({
-        sort: "number",
-        expand: "tool",
-      })
-      .then((data) => {
-        games = data as unknown as GamesRecord[];
-        let now = new Date();
-        games.forEach((game) => {
-          let gameReleaseDate = new Date(game.released);
-          if (
-            gameReleaseDate > now &&
-            (!nextReleasedGame ||
-              gameReleaseDate < new Date(nextReleasedGame.released))
-          ) {
-            nextReleasedGame = game;
-          }
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
+  let gameDetailsDrawer: GameDetailsDrawer;
 
-  onMount(() => {
-    fetchGames();
-  });
+  let gamesPromise = fetchGames();
+
+  async function fetchGames(): Promise<GamesResponse[]> {
+    games = await pb.collection("games_overview").getFullList({
+      sort: "number",
+    });
+    let now = new Date();
+    games.forEach((game) => {
+      game.collectionId = GAMES_COLLECTION_ID;
+      let gameReleaseDate = new Date(game.released);
+      if (
+        gameReleaseDate > now &&
+        (!nextReleasedGame ||
+          gameReleaseDate < new Date(nextReleasedGame.released))
+      ) {
+        nextReleasedGame = game;
+      }
+    });
+    return games;
+  }
 
   function gameCardClicked(number: number) {
-    selectedGame = games[number];
     selectedGameNumber = number;
-    isDrawerOpen = true;
+    gameDetailsDrawer.showGameDetails(number, games[number - 1]);
   }
 
-  function playGame() {
-    isPlayingModalOpen = true;
+  function playIframeGame(game: GamesResponse, gameUrl: string) {
+    modalFrame.playGame(game, gameUrl);
   }
 
   function scrollToTop() {
@@ -102,10 +98,12 @@
   class="fixed top-0 z-[-2] h-screen w-screen rotate-180 transform bg-white bg-[radial-gradient(60%_120%_at_50%_50%,hsla(210,100%,100%,0)_0,rgba(173,216,230,0.5)_100%)] animate-pulse-gradient"
 ></div>
 
-<nav class="flex justify-center w-full my-4">
-  <button
-    class="bg-white rounded-full p-2 hover:bg-slate-100 active:scale-95 border hover:border-slate-300 transition-all shadow-md"
-    on:click={() => (aboutModalOpen = true)}>About</button
+<nav class="flex justify-center w-full my-4 gap-4">
+  <PillButton onClick={() => (aboutModalOpen = true)}>About</PillButton>
+  <PillLink href="https://yoshiip.itch.io">itch.io</PillLink>
+  <PillLink href="https://www.youtube.com/@Aymeri">
+    <Youtube />
+    YouTube</PillLink
   >
 </nav>
 <main class="m-auto max-w-5xl">
@@ -116,6 +114,12 @@
       </h2>
       <Logo00 />
     </div>
+    <p class="text-lg max-w-md">
+      Making <span
+        class="bg-gradient-to-br from-blue-600 to-purple-400 inline-block text-transparent bg-clip-text font-bold"
+        >100 video games</span
+      >, from September 2024 to December 2032 available for free!
+    </p>
     {#if nextReleasedGame}
       <div class="flex flex-col items-center">
         <h3 class="text-lg font-bold">Next game in...</h3>
@@ -124,28 +128,36 @@
     {/if}
   </div>
 
-  <div
-    class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-  >
-    {#if games}
+  {#await gamesPromise}
+    <Spinner />
+  {:then games}
+    <div
+      class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+    >
       {#each Array.from({ length: 100 }) as _, i}
-        <Game number={i} game={games[i]} cardClicked={gameCardClicked} />
+        <GameCard
+          number={i + 1}
+          game={games[i]}
+          cardClicked={gameCardClicked}
+        />
       {/each}
-    {/if}
-  </div>
+    </div>
+  {:catch error}
+    <div class="w-full flex justify-center">
+      <BaseAlert>
+        {error.message}
+      </BaseAlert>
+    </div>
+  {/await}
+  <div class="h-32"></div>
 </main>
 
 {#if showBackToTop}
-  <div
-    class="fixed bottom-4 right-4 bg-slate-200 border border-slate-400 p-2 rounded-full hover:bg-slate-100 cursor-pointer"
-    on:click={scrollToTop}
-    transition:fly={{ x: 100, duration: 100 }}
-  >
-    <ArrowUp size="1.5rem" />
+  <div class="fixed bottom-4 right-4" transition:blur>
+    <CircleButton onClick={scrollToTop}>
+      <ArrowUp />
+    </CircleButton>
   </div>
-{/if}
-{#if selectedGame}
-  <ModalFrame bind:isOpen={isPlayingModalOpen} bind:game={selectedGame} />
 {/if}
 
 <AboutModal
@@ -154,11 +166,12 @@
 />
 
 <GameDetailsDrawer
-  bind:isDrawerOpen
-  game={selectedGame}
-  bind:number={selectedGameNumber}
-  {playGame}
+  bind:isOpen={isDrawerOpen}
+  {playIframeGame}
+  bind:this={gameDetailsDrawer}
 />
+
+<ModalFrame bind:this={modalFrame} />
 
 <style>
   @keyframes pulse-gradient {
