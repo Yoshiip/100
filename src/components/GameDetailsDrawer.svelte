@@ -82,7 +82,8 @@
                   game.expand?.tool,
                   game.expand.tool.icon ?? ""
                 )}
-                alt=""
+                class="absolute top-4 left-4 w-12 h-12 bg-black p-2 bg-opacity-15 rounded border border-slate-400"
+                alt={game.expand.tool.name}
               />
             </div>
           {/if}

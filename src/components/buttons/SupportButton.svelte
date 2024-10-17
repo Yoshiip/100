@@ -1,8 +1,4 @@
 <script lang="ts">
-  import { URL } from "$lib/pocketbase";
-  import { onMount } from "svelte";
-
-  let totalSupport = 0;
   let progress = 0;
 
   function handleClick() {
@@ -10,16 +6,6 @@
       progress += 5;
     }
   }
-
-  onMount(() => {
-    fetch(`${URL}/counter`).then((res) => {
-      if (res.ok) {
-        res.json().then((data) => {
-          totalSupport = data.total_support;
-        });
-      }
-    });
-  });
 </script>
 
 <button
@@ -27,7 +13,7 @@
   on:click={handleClick}
 >
   <div
-    class="absolute inset-0 bg-pink-300 transition-all duration-300"
+    class="absolute inset-0 bg-blue-300 transition-all duration-300"
     style="width: {progress}%"
   ></div>
 
